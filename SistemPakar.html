@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistem Pakar</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+.divider {
+    height: 5px;
+    width: 150px;
+    margin: auto;
+    background: linear-gradient(to right, #7d682f, #baa46c);
+}
+</style>
+
+</head>
+
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+<main class="max-w-4xl mx-auto px-4 py-12">
+
+    <!-- TITLE -->
+    <div class="text-center mb-10">
+        <h1 class="text-5xl font-bold mb-2">Sistem Pakar</h1>
+        <p class="text-xl text-gray-500 mb-4">Deteksi Kerusakan Komputer</p>
+        <div class="divider"></div>
+    </div>
+
+    <!-- SEARCH -->
+    <div class="relative mb-8">
+        <input type="text" id="search"
+            placeholder="Cari gejala..."
+            class="w-full p-5 pr-12 text-lg rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-200">
+
+        <button onclick="clearSearch()"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 text-xl">
+            ✕
+        </button>
+    </div>
+
+    <!-- LIST -->
+    <div id="list" class="grid md:grid-cols-2 gap-6"></div>
+
+    <!-- BUTTON -->
+    <div class="mt-8 space-y-3">
+        <button onclick="diagnosa()"
+            class="w-full bg-gray-800 text-white py-5 text-lg rounded-xl hover:bg-gray-700 transition">
+            Diagnosa
+        </button>
+
+        <button onclick="resetForm()"
+            class="w-full bg-gray-200 py-5 text-lg rounded-xl hover:bg-gray-300 transition">
+            Reset
+        </button>
+    </div>
+
+    <!-- HASIL -->
+    <div id="hasil"
+        class="mt-10 bg-white p-6 rounded-xl shadow-md hidden border text-lg">
+    </div>
+
+</main>
+
+<script>
+const data = [
+"B1 - Tidak ada gambar tertampil di monitor",
+"B2 - Terdapat garis horisontal/vertikal ditengah monitor",
+"B3 - Tidak ada tampilan awal BIOS",
+"B4 - Muncul pesan error pada BIOS (isi pesan selalu berbeda tergantung pada kondisi tertentu)",
+"B5 - Alarm BIOS berbunyi",
+"B6 - Terdengar suara aneh pada HDD",
+"B7 - Sering terjadi hang/crash saat menjalankan aplikasi",
+"B8 - Selalu scandisk ketika booting",
+"B9 - Muncul pesan error saat menjalankan game atau aplikasi grafis",
+"B10 - Device driver informasi tidak terdeteksi dalam device manager, meski driver telah di install",
+"B11 - Tiba-tiba OS melakukan restart otomatis",
+"B12 - Keluarnya blue screen pada OS Windows (isi pesan selalu berbeda tergantung pada kondisi tertentu)",
+"B13 - Suara tetap tidak keluar meskipun driver dan setting device telah dilakukan sesuai petunjuk",
+"B14 - Muncul pesan error saat menjalankan aplikasi audio",
+"B15 - Muncul pesan error saat pertama OS di load dari HDD",
+"B16 - Tidak ada tanda-tanda dari sebagian/seluruh perangkat bekerja (semua kipas pendinginan tidak berputar)",
+"B17 - Sering tiba-tiba mati tanpa sebab",
+"B18 - Muncul pesan pada windows, bahwa windows kekurangan virtual memori",
+"B19 - Aplikasi berjalan dengan lambat, respin yang lambat terhadap inputan",
+"B20 - Kinerja grafis terasa sangat berat (biasanya dalam game dan manipulasi gambar)",
+"B21 - Device tidak terdeteksi dalam BIOS",
+"B22 - Informasi deteksi yang salah dalam BIOS",
+"B23 - Hanya sebagian perangkat yang bekerja",
+"B24 - Sebagian/seluruh karakter inputan mati",
+"B25 - Pointer mouse tidak merespon gerakan mouse"
+];
+
+const list = document.getElementById("list");
+let selected = [];
+
+function renderList(filter="") {
+    list.innerHTML = "";
+
+    data.forEach((g, i) => {
+        if (g.toLowerCase().includes(filter.toLowerCase())) {
+
+            let isActive = selected.includes(i+1);
+
+            list.innerHTML += `
+            <div onclick="toggle(${i+1})"
+                class="bg-white p-5 rounded-xl shadow-md cursor-pointer transition border flex gap-3 items-start
+                ${isActive ? 'border-amber-400 bg-amber-50' : 'border-gray-200 hover:shadow-lg'}">
+
+                <div class="w-5 h-5 border-2 rounded-full mt-1
+                    ${isActive ? 'bg-amber-400 border-amber-400' : 'border-gray-400'}">
+                </div>
+
+                <div>
+                    <b class="text-gray-900 text-lg">B${i+1}</b>
+                    <p class="text-gray-600 text-base">${g.split(' - ')[1]}</p>
+                </div>
+
+            </div>`;
+        }
+    });
+}
+
+function toggle(val) {
+    if (selected.includes(val)) {
+        selected = selected.filter(x => x !== val);
+    } else {
+        selected.push(val);
+    }
+    renderList(document.getElementById("search").value);
+}
+
+document.getElementById("search").addEventListener("keyup", (e) => {
+    renderList(e.target.value);
+});
+
+function clearSearch() {
+    document.getElementById("search").value = "";
+    renderList();
+}
+
+renderList();
+
+const rules = [
+{rule:[1,2], hasil:"Monitor Rusak"},
+{rule:[3,4,5,11,12], hasil:"Memori Rusak"},
+{rule:[6,7,8,10,21,22], hasil:"HDD Rusak"},
+{rule:[1,3,5,9,10,12,13], hasil:"VGA Rusak"},
+{rule:[10,13,14], hasil:"Sound Card Rusak"},
+{rule:[11,15], hasil:"OS Bermasalah"},
+{rule:[7,12], hasil:"Aplikasi Rusak"},
+{rule:[16,17], hasil:"PSU Rusak"},
+{rule:[1,3,4,5], hasil:"Prosesor Rusak"},
+{rule:[18,19], hasil:"Memory Kurang (Perlu Upgrade Memory)"},
+{rule:[9,20], hasil:"Memory VGA Kurang (Perlu Upgrade VGA)"},
+{rule:[19], hasil:"Clock Prosesor Tinggi (perlu Upgrade Prosesor)"},
+{rule:[21], hasil:"Kabel IDE Rusak"},
+{rule:[5,23], hasil:"Kurang Daya Pada PSU (perlu Upgrade PSU)"},
+{rule:[10], hasil:"Perangkat USB Rusak"},
+{rule:[10,24], hasil:"Keyboard Rusak"},
+{rule:[10,25], hasil:"Mouse Rusak"}
+];
+
+function diagnosa() {
+    let hasil = "Tidak ditemukan";
+    let max = 0;
+
+    rules.forEach(r => {
+        let cocok = r.rule.filter(x => selected.includes(x)).length;
+        if (cocok === r.rule.length && cocok > max) {
+            max = cocok;
+            hasil = r.hasil;
+        }
+    });
+
+    let box = document.getElementById("hasil");
+    box.classList.remove("hidden");
+    box.innerHTML = "<b>Hasil Diagnosa:</b><br><br>" + hasil;
+}
+
+function resetForm() {
+    selected = [];
+    renderList();
+    document.getElementById("hasil").classList.add("hidden");
+}
+</script>
+
+</body>
+</html>
