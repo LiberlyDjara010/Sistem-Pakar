@@ -8,58 +8,119 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-.divider {
-    height: 5px;
-    width: 150px;
-    margin: auto;
-    background: linear-gradient(to right, #7d682f, #baa46c);
+body{
+  background: radial-gradient(circle at top, #f5f7f6, #e6ecea);
+  color:#1f2937;
+}
+
+.glass{
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(14px);
+  border:1px solid rgba(0,0,0,0.05);
+}
+
+.soft-card{
+  background:#ffffff;
+  border:1px solid #e5e7eb;
+  transition:0.25s;
+}
+
+.soft-card:hover{
+  transform:scale(1.02);
+  box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+.accent{
+  background: linear-gradient(to right, #7d682f, #baa46c);
+  color:white;
+}
+
+.btn-main{
+  background: linear-gradient(to right, #7d682f, #baa46c);
+  color:white;
+  transition:0.25s;
+}
+
+.btn-main:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(125,104,47,0.4);
+}
+
+.badge{
+  font-size:12px;
+  padding:3px 10px;
+  border-radius:999px;
+  background:#f5efe1;
+  color:#7d682f;
+}
+
+.fade{
+  animation:fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(10px)}
+  to{opacity:1; transform:translateY(0)}
 }
 </style>
 
 </head>
 
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="font-sans">
 
-<main class="max-w-4xl mx-auto px-4 py-12">
+<main class="max-w-6xl mx-auto px-4 py-12">
 
-    <!-- TITLE -->
-    <div class="text-center mb-10">
-        <h1 class="text-5xl font-bold mb-2">Sistem Pakar</h1>
-        <p class="text-xl text-gray-500 mb-4">Deteksi Kerusakan Komputer</p>
-        <div class="divider"></div>
+    <!-- HEADER -->
+    <div class="glass rounded-2xl p-8 mb-10 text-center">
+        <h1 class="text-4xl font-bold mb-2">Sistem Pakar</h1>
+        <p class="text-gray-600">Deteksi Kerusakan Komputer</p>
     </div>
 
     <!-- SEARCH -->
-    <div class="relative mb-8">
+    <div class="mb-8 relative">
         <input type="text" id="search"
             placeholder="Cari gejala..."
-            class="w-full p-5 pr-12 text-lg rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-amber-200">
+            class="w-full p-4 pr-12 text-lg rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-300">
 
-        <button onclick="clearSearch()"
-            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 text-xl">
+        <button type="button" onclick="clearSearch()"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 text-xl z-10">
             ✕
         </button>
     </div>
 
-    <!-- LIST -->
-    <div id="list" class="grid md:grid-cols-2 gap-6"></div>
+    <!-- GRID -->
+    <div class="grid lg:grid-cols-3 gap-8">
 
-    <!-- BUTTON -->
-    <div class="mt-8 space-y-3">
-        <button onclick="diagnosa()"
-            class="w-full bg-gray-800 text-white py-5 text-lg rounded-xl hover:bg-gray-700 transition">
-            Diagnosa
-        </button>
+        <!-- LIST -->
+        <div id="list" class="lg:col-span-2 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[520px] overflow-y-auto pr-2"></div>
 
-        <button onclick="resetForm()"
-            class="w-full bg-gray-200 py-5 text-lg rounded-xl hover:bg-gray-300 transition">
-            Reset
-        </button>
+        <!-- SIDE PANEL -->
+        <div class="glass rounded-2xl p-6 h-fit">
+            <h2 class="font-semibold mb-4">Hasil Diagnosa</h2>
+
+            <div id="hasil"
+                class="mb-4 p-4 rounded-xl hidden border bg-white fade text-sm">
+            </div>
+
+            <h3 class="font-medium mb-2">Pilihan Kamu</h3>
+            <p id="count" class="text-sm text-gray-500 mb-4">0 gejala dipilih</p>
+
+            <button onclick="diagnosa()"
+                class="w-full btn-main text-white py-3 rounded-xl mb-3">
+                Diagnosa
+            </button>
+
+            <button onclick="resetForm()"
+                class="w-full bg-gray-200 py-3 rounded-xl hover:bg-gray-300">
+                Reset
+            </button>
+        </div>
+
     </div>
 
     <!-- HASIL -->
     <div id="hasil"
-        class="mt-10 bg-white p-6 rounded-xl shadow-md hidden border text-lg">
+        class="mt-10 p-6 rounded-2xl hidden border bg-white fade">
     </div>
 
 </main>
@@ -106,21 +167,24 @@ function renderList(filter="") {
 
             list.innerHTML += `
             <div onclick="toggle(${i+1})"
-                class="bg-white p-5 rounded-xl shadow-md cursor-pointer transition border flex gap-3 items-start
-                ${isActive ? 'border-amber-400 bg-amber-50' : 'border-gray-200 hover:shadow-lg'}">
+                class="soft-card p-3 rounded-lg cursor-pointer flex gap-2 items-start
+                ${isActive ? 'ring-2 ring-yellow-500' : ''}">
 
-                <div class="w-5 h-5 border-2 rounded-full mt-1
-                    ${isActive ? 'bg-amber-400 border-amber-400' : 'border-gray-400'}">
+                <div class="w-6 h-6 min-w-[24px] min-h-[24px] rounded-full border flex items-center justify-center text-sm flex-shrink-0
+                    ${isActive ? 'accent' : 'border-gray-400'}">
+                    ${isActive ? '✓' : ''}
                 </div>
 
                 <div>
-                    <b class="text-gray-900 text-lg">B${i+1}</b>
-                    <p class="text-gray-600 text-base">${g.split(' - ')[1]}</p>
+                    <span class="badge text-sm">B${i+1}</span>
+                    <p class="mt-1 text-sm text-gray-700 line-clamp-2">${g.split(' - ')[1]}</p>
                 </div>
 
             </div>`;
         }
     });
+
+    document.getElementById("count").innerText = selected.length + " gejala dipilih";
 }
 
 function toggle(val) {
@@ -136,12 +200,14 @@ document.getElementById("search").addEventListener("keyup", (e) => {
     renderList(e.target.value);
 });
 
+renderList();
+
 function clearSearch() {
-    document.getElementById("search").value = "";
+    const input = document.getElementById("search");
+    input.value = "";
+    input.focus();
     renderList();
 }
-
-renderList();
 
 const rules = [
 {rule:[1,2], hasil:"Monitor Rusak"},
@@ -177,7 +243,8 @@ function diagnosa() {
 
     let box = document.getElementById("hasil");
     box.classList.remove("hidden");
-    box.innerHTML = "<b>Hasil Diagnosa:</b><br><br>" + hasil;
+    box.innerHTML = `<div class="text-lg font-semibold mb-2">Hasil Diagnosa</div>
+    <div class="text-yellow-700 font-bold">${hasil}</div>`;
 }
 
 function resetForm() {
