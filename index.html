@@ -70,13 +70,11 @@ body{
 
 <main class="max-w-6xl mx-auto px-4 py-12">
 
-    <!-- HEADER -->
     <div class="glass rounded-2xl p-8 mb-10 text-center">
         <h1 class="text-4xl font-bold mb-2">Sistem Pakar</h1>
         <p class="text-gray-600">Deteksi Kerusakan Komputer</p>
     </div>
 
-    <!-- SEARCH -->
     <div class="mb-8 relative">
         <input type="text" id="search"
             placeholder="Cari gejala..."
@@ -88,13 +86,10 @@ body{
         </button>
     </div>
 
-    <!-- GRID -->
     <div class="grid lg:grid-cols-3 gap-8">
 
-        <!-- LIST -->
         <div id="list" class="lg:col-span-2 grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[520px] overflow-y-auto pr-2"></div>
 
-        <!-- SIDE PANEL -->
         <div class="glass rounded-2xl p-6 h-fit">
             <h2 class="font-semibold mb-4">Hasil Diagnosa</h2>
 
@@ -116,11 +111,6 @@ body{
             </button>
         </div>
 
-    </div>
-
-    <!-- HASIL -->
-    <div id="hasil"
-        class="mt-10 p-6 rounded-2xl hidden border bg-white fade">
     </div>
 
 </main>
@@ -153,6 +143,26 @@ const data = [
 "B24 - Sebagian/seluruh karakter inputan mati",
 "B25 - Pointer mouse tidak merespon gerakan mouse"
 ];
+
+const kerusakan = {
+A1: "MONITOR RUSAK",
+A2: "MEMORI RUSAK",
+A3: "HDD RUSAK",
+A4: "VGA RUSAK",
+A5: "SOUND CARD RUSAK",
+A6: "OS BERMASALAH",
+A7: "APLIKASI RUSAK",
+A8: "PSU RUSAK",
+A9: "PROSESOR RUSAK",
+A10: "MEMORY KURANG (PERLU UPGRADE MEMORY)",
+A11: "MEMORY VGA KURANG (PERLU UPGRADE VGA)",
+A12: "CLOCK PROSESOR KURANG TINGGI (PERLU UPGRADE PROSESOR)",
+A13: "KABEL IDE RUSAK",
+A14: "KURANG DAYA PADA PSU (PERLU UPGRADE PSU)",
+A15: "PERANGKAT USB RUSAK",
+A16: "KEYBOARD RUSAK",
+A17: "MOUSE RUSAK"
+};
 
 const list = document.getElementById("list");
 let selected = [];
@@ -210,41 +220,64 @@ function clearSearch() {
 }
 
 const rules = [
-{rule:[1,2], hasil:"Monitor Rusak"},
-{rule:[3,4,5,11,12], hasil:"Memori Rusak"},
-{rule:[6,7,8,10,21,22], hasil:"HDD Rusak"},
-{rule:[1,3,5,9,10,12,13], hasil:"VGA Rusak"},
-{rule:[10,13,14], hasil:"Sound Card Rusak"},
-{rule:[11,15], hasil:"OS Bermasalah"},
-{rule:[7,12], hasil:"Aplikasi Rusak"},
-{rule:[16,17], hasil:"PSU Rusak"},
-{rule:[1,3,4,5], hasil:"Prosesor Rusak"},
-{rule:[18,19], hasil:"Memory Kurang (Perlu Upgrade Memory)"},
-{rule:[9,20], hasil:"Memory VGA Kurang (Perlu Upgrade VGA)"},
-{rule:[19], hasil:"Clock Prosesor Tinggi (perlu Upgrade Prosesor)"},
-{rule:[21], hasil:"Kabel IDE Rusak"},
-{rule:[5,23], hasil:"Kurang Daya Pada PSU (perlu Upgrade PSU)"},
-{rule:[10], hasil:"Perangkat USB Rusak"},
-{rule:[10,24], hasil:"Keyboard Rusak"},
-{rule:[10,25], hasil:"Mouse Rusak"}
+{rule:[1,2], hasil:"A1"},
+{rule:[3,4,5,11,12], hasil:"A2"},
+{rule:[6,7,8,10,21,22], hasil:"A3"},
+{rule:[1,3,5,9,10,12,13], hasil:"A4"},
+{rule:[10,13,14], hasil:"A5"},
+{rule:[11,15], hasil:"A6"},
+{rule:[7,12], hasil:"A7"},
+{rule:[16,17], hasil:"A8"},
+{rule:[1,3,4,5], hasil:"A9"},
+{rule:[18,19], hasil:"A10"},
+{rule:[9,20], hasil:"A11"},
+{rule:[19], hasil:"A12"},
+{rule:[21], hasil:"A13"},
+{rule:[5,23], hasil:"A14"},
+{rule:[10], hasil:"A15"},
+{rule:[10,24], hasil:"A16"},
+{rule:[10,25], hasil:"A17"}
 ];
 
 function diagnosa() {
-    let hasil = "Tidak ditemukan";
-    let max = 0;
+    let hasilKode = null;
+    let skorTertinggi = 0;
+    let detail = "";
 
     rules.forEach(r => {
         let cocok = r.rule.filter(x => selected.includes(x)).length;
-        if (cocok === r.rule.length && cocok > max) {
-            max = cocok;
-            hasil = r.hasil;
+        let total = r.rule.length;
+        let skor = cocok / total;
+
+        if (skor > skorTertinggi && cocok > 0) {
+            skorTertinggi = skor;
+            hasilKode = r.hasil;
+
+            detail = `
+                Gejala cocok: ${cocok} dari ${total}<br>
+                Perhitungan: ${cocok} / ${total} = ${(skor * 100).toFixed(0)}%
+            `;
         }
     });
 
     let box = document.getElementById("hasil");
     box.classList.remove("hidden");
-    box.innerHTML = `<div class="text-lg font-semibold mb-2">Hasil Diagnosa</div>
-    <div class="text-yellow-700 font-bold">${hasil}</div>`;
+
+    if (hasilKode) {
+        box.innerHTML = `
+            <div class="text-lg font-semibold mb-2">Hasil Diagnosa</div>
+            <div class="text-yellow-700 font-bold">${kerusakan[hasilKode]}</div>
+            <div class="text-sm text-gray-500 mt-2">Kode: ${hasilKode}</div>
+            <div class="text-sm text-gray-500 mt-2">
+                Tingkat kecocokan: ${(skorTertinggi * 100).toFixed(0)}%
+            </div>
+            <div class="text-sm text-gray-500 mt-2">
+                ${detail}
+            </div>
+        `;
+    } else {
+        box.innerHTML = `<div class="text-red-500">Tidak ditemukan</div>`;
+    }
 }
 
 function resetForm() {
